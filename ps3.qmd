@@ -485,40 +485,94 @@ cat("Test RMSE:", rmse_test_enet, "\nNumber of Retained Vars:", num_nonzero_enet
 
 ## 6.2 The big comparison table
 Fill in this table with your results:
+```{r}
+comparison_table <- tibble(
+  Model = c(
+    "OLS (main effects. 16 vars)",
+    "OLS (kitchen sink, ~141 vars)",
+    "Ridge",
+    "LASSO",
+    "Elastic Net"
+  ),
+  Predictors = c(
+    16,
+    ncol(X_train),
+    "All (~128)",
+    num_nonzero_lasso,
+    num_nonzero_enet
+  ),
+  RMSE = c(
+    rmse_test_simple,
+    rmse_test_full,
+    rmse_test_ridge,
+    rmse_test_lasso,
+    rmse_test_enet
+  )
+)
+
+comparison_table %>%
+  mutate(RMSE = round(RMSE, 3)) %>%
+  kable(
+    col.names = c("Model", "Predictors", "Out-of-Sample RMSE"),
+    align = c("l", "c", "c"),
+    booktabs = TRUE
+  ) %>%
+  kable_styling(latex_options = "hold_position")
+
+```
 
 (a) Which model has the lowest out-of-sample RMSE?
-The LASSO model, with an out-of-sample RMSE of 
+The Elastic Net model has the lowest out-of-sample RMSE of 0.458, making it the best-performing model in terms of predictive accuracy.
 
 (b) Which model has the best in-sample fit? Is that the same model?
-The kitchen-sink model , with an in-sample RMSE of 
+The kitchen-sink OLS model has the best in-sample fit because it has the lowest training RMSE of 0.4890411. However, it does not perform best out-of-sample since it overfits the training data.
 
 (c) In 2–3 sentences, explain what this table teaches about the bias-variance tradeoff.
-BLANK
+This table shows the bias-variance tradeoff through the differences in out-of-sample RMSE performance based on model. The kitchen-sink OLS model has low bias but high variance due to its high model complexity, leading to overfitting and poor out-of-sample performance. However, regularized models like Ridge, LASSO, and Elastic Net introduce some bias by shrinking coefficients, but overall reduce variance and improve generalization, which results in the better out-of-sample performance that we see in our table.
 
 ## 6.3 Baker article connection
-In Baker (2025), two experts in the Halliburton securities case selected different peer firms and reached different conclusions about whether a stock drop was statistically significant.
+In Baker (2025), two experts in the *Halliburton* securities case selected different peer firms and reached different conclusions about whether a stock drop was statistically significant.
 
 (a) How did LASSO help narrow the disagreement between dueling experts?
-BLANK
+LASSO helped narrow the disagreement by using an algorithmic and more computational method of selecting peer firms rather than relying on the subjective choices made by each expert. This means that instead of manually choosing which firms to include, which can lead to different conclusions, LASSO automatically selects the firms that best predict the outcome based on cross-validation. This reduces the scope for disagreement because both experts can rely on the same objective selection procedure.
 
 (b) Based on your experience with LASSO in this problem set, what aspect of the traditional OLS approach gives the analyst the most room for manipulation?
-BLANK
+The traditional OLS approach allows the most room for manipulation because of the subjective selection of variables or peer firms included in the model. Analysts can choose which predictors to include or exclude, and these choices can significantly affect the results and lead to different conclusions. LASSO, however, reduces this subjective discretion by using a systematic approach to variable selection.
 
 ## 6.4 Prediction vs. explanation
 We used these models to predict `recidivism.` Suppose instead you wanted to know whether `priors_count` causes higher recidivism.
 
 (a) Would the LASSO coeﬀicient on `priors_count` answer this causal question? Why or why not?
-BLANK
+No, the LASSO coefficient on `priors_count` would not answer the causal question. This is because LASSO is better for prediction, not causal inference, as its coefficient estimates are biased due to regularization. Additionally, the model does not account for potential confounding variables or omitted variable bias, so the estimated relationship can only reflect correlation an not causation.
 
 (b) What is the difference between using regression for prediction versus using it for causal inference?
-BLANK
+The difference between using regression for prediction versus using it for causal inference is that prediction focuses on accurately forecasting outcomes, while causal inference aims to estimate the effect of one variable on another. So, predictive models like LASSO prioritize minimizing the prediction error and can include biased coefficients or omit variables that are important for interpretation, while causal inference depends on model specification to determine the true causal effect, ensuring that estimates are not driven by confounding factors.
 
 ## 6.5 Algorithmic fairness
 Algorithms like COMPAS are used in real courtrooms to inform bail and sentencing decisions.
 
 (a) Using your simple OLS model (16 vars), compute the mean predicted recidivism probability separately for Black defendants and white defendants in the test set. Is there a difference?
 ```{r}
+# Predict
+pred_test_simple <- predict(ols_simple, test)
+test_with_preds <- test %>%
+  mutate(pred = pred_test_simple)
 
+# Define groups
+black_group <- test_with_preds %>% 
+  filter(black == 1)
+
+white_group <- test_with_preds %>%
+  filter(black == 0 & hispanic == 0 & asian == 0 & other_race == 0 & native_american == 0)
+
+# Compute mean predicted recidivism within groups
+mean_pred_black <- mean(black_group$pred)
+mean_pred_white <- mean(white_group$pred)
+
+# Display results
+cat("Mean Predicted Recidivism Probability:",
+    "\nBlack Defendants:", mean_pred_black, 
+    "\nWhite Defendants:", mean_pred_white)
 ```
 
-
+The mean predicted recidivism probability for Black defendants is 0.512, while for white defendants it is 0.379. There is a substantial difference between the two groups, with Black defendants having a higher predicted probability of recidivism by about 13 percentage points.
