@@ -386,11 +386,12 @@ The out-of sample RMSE for Ridge is 0.470, which is slightly lower than the out-
 ## 4.3 Did Ridge set any coeﬀicients to zero?
 Extract the Ridge coeﬀicients using `coef(cv_ridge, s = "lambda.min").` Did Ridge eliminate any variables? Why or why not?
 ```{r}
-ridge_coefs <- coef(cv_ridge, s = "lambda.min")
-
 # Count number of retained variables
+ridge_coefs <- coef(cv_ridge, s = "lambda.min")
 num_nonzero_ridge <- sum(ridge_coefs[-1] != 0)
-num_nonzero_ridge
+
+# Display results
+cat("Number of Retained Vars:", num_nonzero_ridge)
 ```
 
 There are 128 nonzero coefficients kept by Ridge, so 13 were "eliminated". Even though Ridge does not set any coefficients exactly to 0, some coefficients appear as zero or missing are likely due to redundancy or multicollinearity in the data, rather than Ridge performing variable selection. As such, these predictors are considered less important or not as highly associated with the outcome than other predictors. Additionally, as I discussed earlier, there are likely interaction terms that are always 0 by default, such as `black:hispanic`, `asian:other_race`, etc., since these predictors are mutually exclusive, which causes these to have a coefficient of 0.
@@ -430,7 +431,9 @@ Extract the LASSO coeﬀicients at lambda.min.
 # Count number of retained variables
 lasso_coefs <- coef(cv_lasso, s = "lambda.min")
 num_nonzero_lasso <- sum(lasso_coefs[-1] != 0)
-num_nonzero_lasso
+
+# Display results
+cat("Number of Retained Vars:", num_nonzero_lasso)
 ```
 LASSO selected 27 predictors and eliminated the rest of the 114 predictors. After examining the coefficient matrix, there seemed to be a tendency to keep predictors and interactions between `female`, `age`, `age_under_25`, `priors_count`, `felony`, and categories that tended to relate to juvy.  
 
