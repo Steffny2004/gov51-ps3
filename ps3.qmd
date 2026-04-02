@@ -44,12 +44,13 @@ The variable recidivism equals 1 if the person was rearrested within two years a
 (a) What is the overall recidivism rate in the data?
 ```{r}
 rec_rate <- mean(compas$recidivism)
+rec_rate
 ```
 
 The overall recidivism rate is `rec_rate`.
 
 (b) Is this outcome continuous or binary? Why does this matter for how we interpret predictions from a linear model?
-This outcome is binary, meaning that there are only 2 possible values for the outcome (0 or 1), As such, this makes it difficult to interpret predicitons form a linear model since the interpretation tends to be better understood for continuous variables.
+This outcome is binary, meaning that there are only 2 possible values for the outcome (0 or 1). As such, we interpret predictions from a linear model differently since continuous outcome interpretations can be described as "The outcome variable increases by $\beta_1 $ for a 1-unit increase in the predictor variable $x_i$, holding all other variables constant," where the continuous outcome could constitute any real value, whereas a binary represents an estimated rate/probability that falls strictly between 0 or 1 (inclusive). Because of this, a 1-unit increase in the predictor variable could result in our outcome variable being values that are not within its intended range of support.
 
 ## 1.4 Summary statistics
 Create a summary statistics table showing the mean and standard deviation of all variables in the dataset. Briefly note which variables have the most variation and which have the least.
@@ -75,7 +76,7 @@ summary_stats_rendered <- summary_stats %>%
   # Rename variables
   mutate(
     variable = recode(variable,
-      recidivism = "Recidvism",
+      recidivism = "Recidivism",
       age = "Age",
       female = "Female",
       black = "Black",
@@ -86,7 +87,7 @@ summary_stats_rendered <- summary_stats %>%
       priors_count = "Priors Count",
       felony = "Felony",
       juv_fel_count = "Juvy Felony Count",
-      juv_misd_count = "Juvy Misdeameanor Count",
+      juv_misd_count = "Juvy Misdemeanor Count",
       juv_other_count = "Juvy Other Count",
       has_juv_felony = "Has Juvy Felony",
       has_juv_misd = "Has Juvy Misdemeanor",
@@ -107,7 +108,7 @@ summary_stats_rendered <- summary_stats %>%
       "Priors Count",
       "Felony",
       "Juvy Felony Count",
-      "Juvy Misdeameanor Count",
+      "Juvy Misdemeanor Count",
       "Juvy Other Count",
       "Has Juvy Felony",
       "Has Juvy Misdemeanor",
@@ -452,10 +453,10 @@ rmse_test_enet
 Fill in this table with your results:
 
 (a) Which model has the lowest out-of-sample RMSE?
-BLANK
+The LASSO model, with an out-of-sample RMSE of `rmse_test_lasso`
 
 (b) Which model has the best in-sample fit? Is that the same model?
-BLANK
+The kitchen-sink model , with an in-sample RMSE of rmse_train_full`
 
 (c) In 2–3 sentences, explain what this table teaches about the bias-variance tradeoff.
 BLANK
@@ -470,9 +471,9 @@ BLANK
 BLANK
 
 ## 6.4 Prediction vs. explanation
-We used these models to predict recidivism. Suppose instead you wanted to know whether `priors_count` causes higher recidivism.
+We used these models to predict `recidivism.` Suppose instead you wanted to know whether `priors_count` causes higher recidivism.
 
-(a) Would the LASSO coeﬀicient on priors_count answer this causal question? Why or why not?
+(a) Would the LASSO coeﬀicient on `priors_count` answer this causal question? Why or why not?
 BLANK
 
 (b) What is the difference between using regression for prediction versus using it for causal inference?
@@ -481,7 +482,7 @@ BLANK
 ## 6.5 Algorithmic fairness
 Algorithms like COMPAS are used in real courtrooms to inform bail and sentencing decisions.
 
-(a) Using your simple OLS model (16 vars), compute the mean predicted recidivism prob- ability separately for Black defendants and white defendants in the test set. Is there a difference?
+(a) Using your simple OLS model (16 vars), compute the mean predicted recidivism probability separately for Black defendants and white defendants in the test set. Is there a difference?
 ```{r}
 
 ```
